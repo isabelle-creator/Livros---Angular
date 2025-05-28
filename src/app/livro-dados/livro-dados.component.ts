@@ -1,23 +1,18 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms'; 
 import { Router } from '@angular/router';
-import { Editora } from '../editora';
-import { Livro } from '../livro';
 import { ControleEditoraService } from '../controle-editora.service';
 import { ControleLivrosService } from '../controle-livros.service';
+import { Livro } from '../livro';
 
 @Component({
   selector: 'app-livro-dados',
-  standalone: true,
-  imports: [CommonModule, FormsModule], 
   templateUrl: './livro-dados.component.html',
   styleUrls: ['./livro-dados.component.css']
 })
 export class LivroDadosComponent implements OnInit {
-  public livro: Livro = new Livro();
-  public autoresForm: string = '';
-  public editoras: Array<Editora> = [];
+  livro: Livro = new Livro('', 0, '', '', []);
+  editoras: any[] = [];
+  autores: string[] = [''];
 
   constructor(
     private servEditora: ControleEditoraService,
@@ -25,13 +20,19 @@ export class LivroDadosComponent implements OnInit {
     private router: Router
   ) {}
 
-  ngOnInit(): void {
+  ngOnInit() {
     this.editoras = this.servEditora.getEditoras();
   }
 
-  incluir = (): void => {
-    this.livro.autores = this.autoresForm.split('\n').map(autor => autor.trim());
-    this.servLivros.incluir(this.livro);
-    this.router.navigateByUrl('/lista');
-  };
+  async incluir() {
+    this.livro.codigo = ''; // MongoDB assigns _id
+    const sucesso = await this.servLivros.incluir(this.livro);
+    if (sucesso) {
+      this.router.navigateByUrl('/lista');
+    }
+  }
+
+  adicionarAutor() {
+    this.autores.push('');
+  }
 }
